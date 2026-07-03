@@ -465,7 +465,7 @@
             }
         }
 
-        /* ===== META CONTAINER - centrado ===== */
+        /* META CONTAINER - diseño centrado y ordenado */
         .meta-container {
             background: var(--bg-card);
             color: var(--texto-principal);
@@ -479,6 +479,7 @@
             gap: 12px;
         }
 
+        /* Primera fila: período y badge */
         .meta-top {
             display: flex;
             justify-content: space-between;
@@ -518,6 +519,7 @@
             margin-right: 6px;
         }
 
+        /* Segunda fila: meta y contador centrados */
         .meta-center {
             display: flex;
             flex-direction: column;
@@ -1077,8 +1079,9 @@
             <button class="clear-btn" id="clearFilters"><i class="fas fa-undo-alt"></i> Limpiar todo</button>
         </div>
 
-        <!-- META CONTAINER - centrado -->
+        <!-- META CONTAINER - centrado y ordenado -->
         <div class="meta-container">
+            <!-- Fila superior: período y badge Healthspring -->
             <div class="meta-top">
                 <div class="info-mes-grid">
                     <div class="info-badge">Periodo: Julio 01 - 31, 2026</div>
@@ -1088,6 +1091,8 @@
                     <i class="fas fa-calendar-check"></i> Healthspring Mes 7: 06/07 – 02/08
                 </div>
             </div>
+
+            <!-- Fila central: meta y contador centrados -->
             <div class="meta-center">
                 <h2>Meta mensual: <span>10,000 NAP</span> por agente</h2>
                 <p>Tiempo restante para terminar el mes:</p>
