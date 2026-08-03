@@ -430,6 +430,12 @@
             background: rgba(0, 230, 118, 0.12);
         }
 
+        .healthspring-badge.no-iniciado {
+            border-color: #9aafc4;
+            color: #9aafc4;
+            background: rgba(154, 175, 196, 0.12);
+        }
+
         .meta-center {
             display: flex;
             flex-direction: column;
@@ -1254,6 +1260,7 @@
                 <select id="filterMes">
                     <option value="6">Mes 6 (01/06 – 05/07)</option>
                     <option value="7" selected>Mes 7 (06/07 – 02/08)</option>
+                    <option value="8">Mes 8 (03/08 – 06/09)</option>
                 </select>
             </div>
 
@@ -1294,13 +1301,8 @@
                     <div class="info-badge" id="periodoBadge">HealthSpring 7 (06/07 – 02/08)</div>
                     <div class="info-badge" id="semanasMes">Semanas del Mes: 4</div>
                 </div>
-                <div class="healthspring-wrapper">
-                    <div class="healthspring-badge terminado">
-                        <i class="fas fa-calendar-check"></i> HealthSpring Mes 6: 01/06 – 05/07 Terminado
-                    </div>
-                    <div class="healthspring-badge en-curso">
-                        <i class="fas fa-calendar-check"></i> HealthSpring Mes 7: 06/07 – 02/08 En Curso
-                    </div>
+                <div class="healthspring-wrapper" id="healthspringBadges">
+                    <!-- Los badges se generan dinámicamente con JS -->
                 </div>
             </div>
 
@@ -1405,10 +1407,11 @@
         const META_GLOBAL_NAP = 480000; // meta global mensual
         const UMBRAL_AGENTE_PRODUCTO = 5000;
 
-        // Fechas de los meses HealthSpring (año 2026) - fechas fijas de fin
+        // Fechas de los meses HealthSpring (año 2026)
         const MESES_HEALTHSPRING = {
-            6: { inicio: new Date(2026, 5, 1), fin: new Date(2026, 6, 5) }, // 01/06 – 05/07
-            7: { inicio: new Date(2026, 6, 6), fin: new Date(2026, 7, 2) }  // 06/07 – 02/08
+            6: { inicio: new Date(2026, 5, 1), fin: new Date(2026, 6, 5) },   // 01/06 – 05/07
+            7: { inicio: new Date(2026, 6, 6), fin: new Date(2026, 7, 2) },   // 06/07 – 02/08
+            8: { inicio: new Date(2026, 7, 3), fin: new Date(2026, 8, 6) }    // 03/08 – 06/09
         };
 
         const $ = (id) => document.getElementById(id);
@@ -1451,6 +1454,7 @@
         const topAgentsTitle = $('topAgentsTitle');
         const rankingTitle = $('rankingTitle');
         const footerNote = $('footerNote');
+        const healthspringBadges = $('healthspringBadges');
 
         let allData = [];
         let selectedStart = null;
@@ -1533,23 +1537,33 @@
         }
 
         // ================================================================
-        // OBTENER MES ACTUAL SEGÚN FECHA
+        // OBTENER MES ACTUAL SEGÚN FECHA (dinámico)
         // ================================================================
         function obtenerMesActual() {
             const hoy = new Date();
             hoy.setHours(0, 0, 0, 0);
-            const inicio6 = MESES_HEALTHSPRING[6].inicio;
-            const fin6 = MESES_HEALTHSPRING[6].fin;
-            if (hoy >= inicio6 && hoy <= fin6) {
-                return 6;
+            const meses = Object.keys(MESES_HEALTHSPRING).map(Number).sort((a, b) => a - b);
+            for (const m of meses) {
+                const { inicio, fin } = MESES_HEALTHSPRING[m];
+                const inicioDate = new Date(inicio);
+                inicioDate.setHours(0, 0, 0, 0);
+                const finDate = new Date(fin);
+                finDate.setHours(23, 59, 59, 999);
+                if (hoy >= inicioDate && hoy <= finDate) {
+                    return m;
+                }
             }
-            const inicio7 = MESES_HEALTHSPRING[7].inicio;
-            const fin7 = MESES_HEALTHSPRING[7].fin;
-            if (hoy >= inicio7 && hoy <= fin7) {
-                return 7;
-            }
-            if (hoy < inicio6) return 6;
-            if (hoy > fin7) return 7;
+            // Si hoy es anterior al primer mes, devolver el primero
+            const primerMes = meses[0];
+            const primerInicio = new Date(MESES_HEALTHSPRING[primerMes].inicio);
+            primerInicio.setHours(0, 0, 0, 0);
+            if (hoy < primerInicio) return primerMes;
+            // Si hoy es posterior al último mes, devolver el último
+            const ultimoMes = meses[meses.length - 1];
+            const ultimoFin = new Date(MESES_HEALTHSPRING[ultimoMes].fin);
+            ultimoFin.setHours(23, 59, 59, 999);
+            if (hoy > ultimoFin) return ultimoMes;
+            // Fallback
             return 7;
         }
 
@@ -1602,6 +1616,44 @@
             if (!rango) return;
             const semanas = calcularSemanas(rango.inicio, rango.fin);
             semanasBadge.textContent = `Semanas del Mes: ${semanas}`;
+        }
+
+        // ================================================================
+        // ACTUALIZAR BADGES DE HEALTHSPRING (dinámicos)
+        // ================================================================
+        function actualizarBadgesHealthSpring() {
+            if (!healthspringBadges) return;
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            let html = '';
+            const meses = Object.keys(MESES_HEALTHSPRING).map(Number).sort((a, b) => a - b);
+            for (const m of meses) {
+                const { inicio, fin } = MESES_HEALTHSPRING[m];
+                const inicioDate = new Date(inicio);
+                inicioDate.setHours(0, 0, 0, 0);
+                const finDate = new Date(fin);
+                finDate.setHours(23, 59, 59, 999);
+                let estado = '';
+                let clase = '';
+                if (hoy < inicioDate) {
+                    estado = 'No Iniciado';
+                    clase = 'no-iniciado';
+                } else if (hoy >= inicioDate && hoy <= finDate) {
+                    estado = 'En Curso';
+                    clase = 'en-curso';
+                } else {
+                    estado = 'Terminado';
+                    clase = 'terminado';
+                }
+                const inicioStr = formatDateDisplay(inicioDate);
+                const finStr = formatDateDisplay(finDate);
+                html += `
+                    <div class="healthspring-badge ${clase}">
+                        <i class="fas fa-calendar-check"></i> HealthSpring Mes ${m}: ${inicioStr} – ${finStr} ${estado}
+                    </div>
+                `;
+            }
+            healthspringBadges.innerHTML = html;
         }
 
         // ================================================================
@@ -1951,6 +2003,14 @@
                     fin = hoy;
                 }
             }
+            // Para Mes 8, si aún no ha llegado al 06/09, usar hoy como fin
+            if (mes === 8) {
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                if (hoy < fin) {
+                    fin = hoy;
+                }
+            }
 
             selectedStart = inicio;
             selectedEnd = fin;
@@ -1958,18 +2018,21 @@
             // Actualizar badge del periodo
             const inicioStr = formatDateDisplay(inicio);
             const finStr = formatDateDisplay(fin);
-            const mesTexto = mes === 6 ? '6' : '7';
+            const mesTexto = mes;
             if (mes === 6) {
                 periodoBadge.textContent = `HealthSpring 6 (${inicioStr} – ${finStr})`;
-            } else {
+            } else if (mes === 7) {
                 const finReal = fin < MESES_HEALTHSPRING[7].fin ? ` (hasta ${finStr})` : '';
                 periodoBadge.textContent = `HealthSpring 7 (${inicioStr} – ${formatDateDisplay(MESES_HEALTHSPRING[7].fin)})${finReal}`;
+            } else if (mes === 8) {
+                const finReal = fin < MESES_HEALTHSPRING[8].fin ? ` (hasta ${finStr})` : '';
+                periodoBadge.textContent = `HealthSpring 8 (${inicioStr} – ${formatDateDisplay(MESES_HEALTHSPRING[8].fin)})${finReal}`;
             }
 
             // Actualizar títulos de secciones
             topAgentsTitle.innerHTML = `<i class="fas fa-trophy"></i> TOP AGENTES POR PRODUCTOS · Mes ${mesTexto}`;
             rankingTitle.innerHTML = `<i class="fas fa-chart-simple"></i> TOP PRODUCTOS · Mes ${mesTexto}`;
-            footerNote.innerHTML = `<i class="far fa-calendar-alt"></i> Datos agrupados por agente · Mes ${mesTexto} (Julio 2026)`;
+            footerNote.innerHTML = `<i class="far fa-calendar-alt"></i> Datos agrupados por agente · Mes ${mesTexto} (2026)`;
 
             // Actualizar contador y semanas
             updateCountdown();
@@ -2297,6 +2360,7 @@
             if (data && data.length > 0) {
                 allData = data;
                 initMultiselectEvents();
+                actualizarBadgesHealthSpring();
 
                 const mesActual = obtenerMesActual();
                 filterMes.value = String(mesActual);
