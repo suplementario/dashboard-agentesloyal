@@ -1261,6 +1261,7 @@
                     <option value="6">Mes 6 (01/06 – 05/07)</option>
                     <option value="7" selected>Mes 7 (06/07 – 02/08)</option>
                     <option value="8">Mes 8 (03/08 – 06/09)</option>
+                    <option value="9">Mes 9 (07/09 – 04/10)</option>   <!-- NUEVO -->
                 </select>
             </div>
 
@@ -1407,11 +1408,12 @@
         const META_GLOBAL_NAP = 480000; // meta global mensual
         const UMBRAL_AGENTE_PRODUCTO = 5000;
 
-        // Fechas de los meses HealthSpring (año 2026)
+        // ===== MODIFICACIÓN: AÑADIDO MES 9 =====
         const MESES_HEALTHSPRING = {
             6: { inicio: new Date(2026, 5, 1), fin: new Date(2026, 6, 5) },   // 01/06 – 05/07
             7: { inicio: new Date(2026, 6, 6), fin: new Date(2026, 7, 2) },   // 06/07 – 02/08
-            8: { inicio: new Date(2026, 7, 3), fin: new Date(2026, 8, 6) }    // 03/08 – 06/09
+            8: { inicio: new Date(2026, 7, 3), fin: new Date(2026, 8, 6) },   // 03/08 – 06/09
+            9: { inicio: new Date(2026, 8, 7), fin: new Date(2026, 9, 4) }    // 07/09 – 04/10
         };
 
         const $ = (id) => document.getElementById(id);
@@ -1995,16 +1997,8 @@
             let inicio = new Date(rango.inicio);
             let fin = new Date(rango.fin);
 
-            // Para el filtro de datos, si es Mes 7 y aún no ha llegado al 02/08, usar hoy como fin
-            if (mes === 7) {
-                const hoy = new Date();
-                hoy.setHours(0, 0, 0, 0);
-                if (hoy < fin) {
-                    fin = hoy;
-                }
-            }
-            // Para Mes 8, si aún no ha llegado al 06/09, usar hoy como fin
-            if (mes === 8) {
+            // ===== MODIFICACIÓN: se incluye el mes 9 en el ajuste de fecha fin =====
+            if (mes === 7 || mes === 8 || mes === 9) {
                 const hoy = new Date();
                 hoy.setHours(0, 0, 0, 0);
                 if (hoy < fin) {
@@ -2019,6 +2013,7 @@
             const inicioStr = formatDateDisplay(inicio);
             const finStr = formatDateDisplay(fin);
             const mesTexto = mes;
+            // ===== MODIFICACIÓN: se añade el bloque para mes 9 =====
             if (mes === 6) {
                 periodoBadge.textContent = `HealthSpring 6 (${inicioStr} – ${finStr})`;
             } else if (mes === 7) {
@@ -2027,6 +2022,9 @@
             } else if (mes === 8) {
                 const finReal = fin < MESES_HEALTHSPRING[8].fin ? ` (hasta ${finStr})` : '';
                 periodoBadge.textContent = `HealthSpring 8 (${inicioStr} – ${formatDateDisplay(MESES_HEALTHSPRING[8].fin)})${finReal}`;
+            } else if (mes === 9) {
+                const finReal = fin < MESES_HEALTHSPRING[9].fin ? ` (hasta ${finStr})` : '';
+                periodoBadge.textContent = `HealthSpring 9 (${inicioStr} – ${formatDateDisplay(MESES_HEALTHSPRING[9].fin)})${finReal}`;
             }
 
             // Actualizar títulos de secciones
