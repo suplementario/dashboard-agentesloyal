@@ -268,6 +268,9 @@
                 <option value="7">MES 7 (06/07/2026 – 08/02/2026)</option>
                 <option value="8">MES 8 (08/03/2026 – 09/06/2026)</option>
                 <option value="9">MES 9 (09/07/2026 – 10/04/2026)</option>
+                <option value="10">MES 10 (10/05/2026 – 11/01/2026)</option>
+                <option value="11">MES 11 (11/02/2026 – 12/06/2026)</option>
+                <option value="12">MES 12 (12/07/2026 – 01/03/2027)</option>
             </select>
         </div>
         <div class="group">
@@ -424,6 +427,24 @@
             fin:    new Date(2026, 9, 4),
             etiqueta: 'MES 9',
             etiquetaLarga: 'MES 9 (09/07/2026 – 10/04/2026)'
+        },
+        10: {
+            inicio: new Date(2026, 9, 5),
+            fin:    new Date(2026, 10, 1),
+            etiqueta: 'MES 10',
+            etiquetaLarga: 'MES 10 (10/05/2026 – 11/01/2026)'
+        },
+        11: {
+            inicio: new Date(2026, 10, 2),
+            fin:    new Date(2026, 11, 6),
+            etiqueta: 'MES 11',
+            etiquetaLarga: 'MES 11 (11/02/2026 – 12/06/2026)'
+        },
+        12: {
+            inicio: new Date(2026, 11, 7),
+            fin:    new Date(2027, 0, 3),
+            etiqueta: 'MES 12',
+            etiquetaLarga: 'MES 12 (12/07/2026 – 01/03/2027)'
         }
     };
 
@@ -567,7 +588,7 @@
     function obtenerMesVigente() {
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
-        for (const m of [7, 8, 9]) {
+        for (const m of [7, 8, 9, 10, 11, 12]) {
             const r = MESES_HEALTHSPRING[m];
             const ini = new Date(r.inicio); ini.setHours(0, 0, 0, 0);
             const fin = new Date(r.fin);    fin.setHours(23, 59, 59, 999);
@@ -575,7 +596,7 @@
         }
         const ini7 = new Date(MESES_HEALTHSPRING[7].inicio); ini7.setHours(0, 0, 0, 0);
         if (hoy < ini7) return 7;
-        return 9;
+        return 12;
     }
 
     function diasRestantesMes(mes) {
@@ -1208,7 +1229,7 @@
                 applyFilters();
             });
 
-            [7, 8, 9].forEach(m => {
+            [7, 8, 9, 10, 11, 12].forEach(m => {
                 const count = allData.filter(r => {
                     const f = parseEmisionFecha(r[COL_EMISION]);
                     return fechaEnMes(f, m);
